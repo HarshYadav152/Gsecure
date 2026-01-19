@@ -1,5 +1,5 @@
 import connectingtoDB from '@/lib/db/mongodb';
-import { User } from '@/lib/models/User.js';
+import User from '@/lib/models/User';
 import { verifyAccessToken } from '@/lib/utils/jwt';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
