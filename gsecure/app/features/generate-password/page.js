@@ -32,7 +32,7 @@ export default function GeneratePassword() {
                 return;
             }
 
-            const url = `${import.meta.env.VITE_APP_HOST}/gs/api/v1/core/generate-pass`;
+            const url = `${process.env.NEXT_PUBLIC_API_HOST}/api/v1/core/generate-pass`;
             const response = await fetch(url, {
                 method: "POST",
                 headers: {
@@ -330,7 +330,6 @@ export default function GeneratePassword() {
                                 <div className="relative flex items-center justify-center">
                                     {isLoading ? (
                                         <div className="flex items-center gap-3">
-                                            <Loader />
                                             <span>Generating Secure Password...</span>
                                         </div>
                                     ) : (
