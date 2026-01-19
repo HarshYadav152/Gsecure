@@ -1,21 +1,21 @@
 "use client"
 import React from 'react';
-import { Shield, Key, AlertTriangle, Lock, Sparkles, Zap, Cpu } from 'lucide-react';
+import { Key, AlertTriangle, Lock, Zap, Cpu } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 const Features = () => {
   const router = useRouter();
 
   const handleGeneratePassword = () => {
-    router.push('/features/generate');
+    router.push('/features/generate-password');
   };
 
   const handleBreachCheck = () => {
-    router.push('/features/breach');
+    router.push('/features/breach-check');
   };
 
   const handleStrengthCheck = () => {
-    router.push('/features/strength');
+    router.push('/features/strength-check');
   };
 
   const features = [
