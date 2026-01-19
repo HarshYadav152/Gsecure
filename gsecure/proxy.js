@@ -24,7 +24,7 @@ const authRoutes = [
   '/register'
 ];
 
-export async function middleware(request) {
+export async function proxy(request) {
   const { pathname } = request.nextUrl;
   
   // Get token from cookies
