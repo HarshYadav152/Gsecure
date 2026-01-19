@@ -1,12 +1,12 @@
 "use client"
 import { useAuth } from '@/lib/contexts/AuthContext';
+import Cookies from 'js-cookie';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react'
-import toast from 'react-hot-toast';
 
 function Login(props) {
-    const { resetSessionTimer, setAuthenticated, setUser } = useAuth();
+    const {setUser,setAuthenticated} = useAuth()
     const [errors, setErrors] = useState("")
     const [isLoading, setIsLoading] = useState(false);
     const [logininfo, setLoginInfo] = useState({
@@ -40,23 +40,6 @@ function Login(props) {
         try {
             setIsLoading(true);
 
-            // getting ip address
-            const resIP = await fetch(`${import.meta.env.VITE_APP_HOST}/gs/api/v1/core/ip`, {
-                method: "GET",
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: "include"
-            });
-            if (!resIP.ok) {
-                setErrors("Network error: Could not get secure connection");
-            }
-            const ip = await resIP.json();
-            const ipAdr = ip.data;
-
-            const encryptedUsername = CryptoJS.AES.encrypt(username, ipAdr).toString();
-            const encryptedPassword = CryptoJS.AES.encrypt(password, ipAdr).toString();
-
             const url = `${process.env.NEXT_PUBLIC_API_HOST}/api/v1/auth/login`;
             const response = await fetch(url, {
                 method: "POST",
@@ -64,9 +47,8 @@ function Login(props) {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    uname: encryptedUsername,
-                    upassword: encryptedPassword,
-                    keyword: ipAdr
+                    uname: logininfo.username,
+                    upassword: logininfo.password,
                 }),
                 credentials: "include"
             });
@@ -78,12 +60,9 @@ function Login(props) {
             const result = await response.json();
 
             if (result.success) {
-                localStorage.setItem('accessToken', result.data.accessToken);
-
-                toast.success("Login successful");
+                Cookies.set("authToken",result.data.authToken)
                 setAuthenticated(true);
                 setUser(result.data);
-                resetSessionTimer();
                 
                 router.push("/vault");
             } else {

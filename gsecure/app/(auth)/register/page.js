@@ -1,7 +1,5 @@
 "use client"
 import React, { useState } from 'react'
-import CryptoJS from "crypto-js";
-import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -35,10 +33,6 @@ function Signup() {
         }
 
         try {
-            const encryptedUsername = CryptoJS.AES.encrypt(uname, keyword).toString();
-            const encryptedPassword = CryptoJS.AES.encrypt(upassword, keyword).toString();
-            const encryptedEmail = CryptoJS.AES.encrypt(uemail, keyword).toString();
-
             const url = `${process.env.NEXT_PUBLIC_API_HOST}/api/v1/auth/register`;
             const response = await fetch(url, {
                 method: "POST",
@@ -46,9 +40,9 @@ function Signup() {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    uname: encryptedUsername,
-                    uemail: encryptedEmail,
-                    upassword: encryptedPassword,
+                    uname: signupinfo.uname,
+                    uemail: signupinfo.uemail,
+                    upassword: signupinfo.upassword,
                     keyword: keyword
                 }),
                 credentials:"include"
@@ -57,17 +51,14 @@ function Signup() {
             const result = await response.json();
 
             if (result.ok || result.success) {
-                toast.success("Account created successfully");
                 router.push("/vault");
             } else {
                 const errorMsg = result.message || "Registration failed";
                 setErrors(errorMsg);
-                toast.error(errorMsg);
             }
         } catch (error) {
             console.error("Registration error:", error);
             setErrors("Network error. Please try again.");
-            toast.error("Registration failed. Please try again.");
         } finally {
             setIsLoading(false)
             setsignupInfo({
