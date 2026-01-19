@@ -28,4 +28,4 @@ const VaultSchema = new mongoose.Schema({
     }
 }, { timestamps: true })
 
-export const Vault = mongoose.model("Vault",VaultSchema);
+export default mongoose.models.Vault || mongoose.model("Vault", VaultSchema);
