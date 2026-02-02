@@ -132,62 +132,6 @@ const AddPassword = () => {
             </div>
 
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
-              {/* Info Section */}
-              <div className="space-y-8">
-                {/* Security Card */}
-                <div className="relative backdrop-blur-sm bg-gradient-to-br from-white/5 to-white/10 rounded-2xl border border-white/10 p-6">
-                  <h3 className="text-lg font-semibold text-gray-300 mb-4 flex items-center">
-                    <Zap className="w-5 h-5 text-amber-400 mr-2" />
-                    How Encryption Works
-                  </h3>
-                  <ul className="space-y-3">
-                    {[
-                      "Your password is encrypted locally using AES-256",
-                      "The encryption key is never stored on our servers",
-                      "Only you can decrypt with your master key",
-                      "End-to-end encryption ensures maximum privacy"
-                    ].map((item, index) => (
-                      <li key={index} className="flex items-start text-sm">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 mr-3 flex-shrink-0"></div>
-                        <span className="text-gray-300">{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Security Features */}
-                <div className="space-y-4">
-                  <h4 className="text-sm font-medium text-gray-300">Security Features:</h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      { label: 'AES-256', color: 'from-blue-500 to-cyan-500', icon: '🔒' },
-                      { label: 'Zero-Knowledge', color: 'from-emerald-500 to-green-500', icon: '🛡️' },
-                      { label: 'Local Encryption', color: 'from-purple-500 to-violet-500', icon: '💻' },
-                      { label: 'Secure Storage', color: 'from-amber-500 to-orange-500', icon: '🗄️' },
-                    ].map((feature, index) => (
-                      <div key={index} className="flex items-center p-3 rounded-lg backdrop-blur-sm bg-white/5 border border-white/10">
-                        <span className="text-lg mr-2">{feature.icon}</span>
-                        <span className="text-xs text-gray-300">{feature.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Important Note */}
-                <div className="relative backdrop-blur-sm bg-gradient-to-r from-amber-900/20 to-yellow-900/20 rounded-2xl border border-amber-900/30 p-5">
-                  <div className="flex items-start">
-                    <div className="p-2 rounded-lg bg-gradient-to-r from-amber-500 to-yellow-500 mr-3">
-                      <Key className="w-5 h-5 text-black" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-amber-300 mb-1">Important</h4>
-                      <p className="text-sm text-amber-200/80">
-                        Your master key is never stored. If you lose it, you won't be able to decrypt your passwords.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
               {/* Form Section */}
               <div className="space-y-6">
@@ -363,6 +307,63 @@ const AddPassword = () => {
                   <span className="px-3 py-1.5 text-xs bg-gradient-to-r from-purple-900/30 to-violet-900/20 text-purple-300 rounded-full border border-purple-900/30">
                     💻 Local Processing
                   </span>
+                </div>
+              </div>
+
+              {/* Info Section */}
+              <div className="space-y-8">
+                {/* Security Card */}
+                <div className="relative backdrop-blur-sm bg-gradient-to-br from-white/5 to-white/10 rounded-2xl border border-white/10 p-6">
+                  <h3 className="text-lg font-semibold text-gray-300 mb-4 flex items-center">
+                    <Zap className="w-5 h-5 text-amber-400 mr-2" />
+                    How Encryption Works
+                  </h3>
+                  <ul className="space-y-3">
+                    {[
+                      "Your password is encrypted locally using AES-256",
+                      "The encryption key is never stored on our servers",
+                      "Only you can decrypt with your master key",
+                      "End-to-end encryption ensures maximum privacy"
+                    ].map((item, index) => (
+                      <li key={index} className="flex items-start text-sm">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 mr-3 flex-shrink-0"></div>
+                        <span className="text-gray-300">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Security Features */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium text-gray-300">Security Features:</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { label: 'AES-256', color: 'from-blue-500 to-cyan-500', icon: '🔒' },
+                      { label: 'Zero-Knowledge', color: 'from-emerald-500 to-green-500', icon: '🛡️' },
+                      { label: 'Local Encryption', color: 'from-purple-500 to-violet-500', icon: '💻' },
+                      { label: 'Secure Storage', color: 'from-amber-500 to-orange-500', icon: '🗄️' },
+                    ].map((feature, index) => (
+                      <div key={index} className="flex items-center p-3 rounded-lg backdrop-blur-sm bg-white/5 border border-white/10">
+                        <span className="text-lg mr-2">{feature.icon}</span>
+                        <span className="text-xs text-gray-300">{feature.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Important Note */}
+                <div className="relative backdrop-blur-sm bg-gradient-to-r from-amber-900/20 to-yellow-900/20 rounded-2xl border border-amber-900/30 p-5">
+                  <div className="flex items-start">
+                    <div className="p-2 rounded-lg bg-gradient-to-r from-amber-500 to-yellow-500 mr-3">
+                      <Key className="w-5 h-5 text-black" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-amber-300 mb-1">Important</h4>
+                      <p className="text-sm text-amber-200/80">
+                        Your master key is never stored. If you lose it, you won't be able to decrypt your passwords.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
