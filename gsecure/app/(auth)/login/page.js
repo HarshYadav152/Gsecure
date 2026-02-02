@@ -62,7 +62,7 @@ function Login(props) {
             if (result.success) {
                 Cookies.set("authToken",result.data.authToken)
                 setAuthenticated(true);
-                setUser(result.data);
+                setUser(result.data.user);
                 
                 router.push("/vault");
             } else {
