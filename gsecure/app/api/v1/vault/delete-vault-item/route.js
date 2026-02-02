@@ -11,7 +11,7 @@ export async function DELETE(req) {
         const { keyword } = body;
 
         // Get the token from cookies
-        const token = cookies().get("authToken")?.value;
+        const token = (await cookies()).get("authToken")?.value;
 
         if (!token) {
             return NextResponse.json(
