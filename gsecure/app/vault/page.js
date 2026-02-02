@@ -1,8 +1,9 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { Eye, EyeOff, Copy, Plus, RefreshCw, Lock, Globe, User, FileText, Shield, Key, ExternalLink } from 'lucide-react';
+import { Eye, EyeOff, Copy, Plus, RefreshCw, Lock, Globe, User, FileText, Shield, Key, ExternalLink, Trash2, Edit, X } from 'lucide-react';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
+import CryptoJS from 'crypto-js';
 
 function Vault() {
     const [showPassword, setShowPassword] = useState({});
@@ -10,7 +11,16 @@ function Vault() {
     const [status, setStatus] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [copiedId, setCopiedId] = useState(null);
-    const router = useRouter()
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedEntry, setSelectedEntry] = useState(null);
+    const [updateFormData, setUpdateFormData] = useState({
+        website: '',
+        username: '',
+        password: '',
+        note: '',
+        keyword: ''
+    });
+    const router = useRouter();
 
     const handleAdd = () => {
         router.push("/vault/add");
@@ -22,13 +32,16 @@ function Vault() {
             alert("Keyword is required to decrypt the password.");
             return;
         }
-    
+
         try {
+            const bytes = CryptoJS.AES.decrypt(encryptedPassword, keyword);
+            const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+
             if (!decrypted) {
                 alert("❌ Failed to decrypt password. Incorrect keyword.");
                 return;
             }
-    
+
             await navigator.clipboard.writeText(decrypted);
             setCopiedId(id);
             setTimeout(() => setCopiedId(null), 2000);
@@ -45,6 +58,7 @@ function Vault() {
             const url = `${process.env.NEXT_PUBLIC_API_HOST}/api/v1/vault/expose-vault`;
             const response = await fetch(url, {
                 method: 'GET',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -67,7 +81,125 @@ function Vault() {
         }
     };
 
-    // Auto-load passwords on component mount
+    // Delete Vault Entry
+    const handleDelete = async (id) => {
+        const keyword = prompt("🔐 Enter your decryption keyword to delete:");
+        if (!keyword) {
+            alert("Keyword is required to delete the entry.");
+            return;
+        }
+
+        if (!confirm("Are you sure you want to delete this entry? This action cannot be undone.")) {
+            return;
+        }
+
+        try {
+            const url = `${process.env.NEXT_PUBLIC_API_HOST}/api/v1/vault/delete-vault-item?id=${id}`;
+            const response = await fetch(url, {
+                method: "DELETE",
+                credentials: 'include',
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ keyword }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert("✅ " + result.message);
+                getSavedPassword();
+            } else {
+                alert("❌ " + result.message);
+            }
+        } catch (error) {
+            console.error("Error deleting vault entry:", error);
+            alert("Failed to delete the entry. Please try again.");
+        }
+    };
+
+    // Open Update Modal
+    const handleUpdateClick = (password) => {
+        setSelectedEntry(password);
+        setUpdateFormData({
+            website: password.website,
+            username: password.username,
+            password: '',
+            note: password.notes || '',
+            keyword: ''
+        });
+        setIsModalOpen(true);
+    };
+
+    // Close Modal
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setSelectedEntry(null);
+        setUpdateFormData({
+            website: '',
+            username: '',
+            password: '',
+            note: '',
+            keyword: ''
+        });
+    };
+
+    // Handle Form Change
+    const handleFormChange = (e) => {
+        const { name, value } = e.target;
+        setUpdateFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    // Submit Update
+    const handleUpdateSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!updateFormData.keyword) {
+            alert("Keyword is required to update the entry.");
+            return;
+        }
+
+        try {
+            // Encrypt the new password if provided
+            let encryptedPassword = updateFormData.password;
+            if (updateFormData.password) {
+                encryptedPassword = CryptoJS.AES.encrypt(updateFormData.password, updateFormData.keyword).toString();
+            }
+
+            const url = `${process.env.NEXT_PUBLIC_API_HOST}/api/v1/vault/update-vault-item?id=${selectedEntry.id}`;
+            const response = await fetch(url, {
+                method: "PATCH",
+                credentials: 'include',
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    website: updateFormData.website,
+                    username: updateFormData.username,
+                    password: encryptedPassword || undefined,
+                    note: updateFormData.note,
+                    keyword: updateFormData.keyword
+                }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert("✅ " + result.message);
+                handleCloseModal();
+                getSavedPassword();
+            } else {
+                alert("❌ " + result.message);
+            }
+        } catch (error) {
+            console.error("Error updating vault entry:", error);
+            alert("Failed to update the entry. Please try again.");
+        }
+    };
+
     useEffect(() => {
         const token = Cookies.get('authToken');
         if (token) {
@@ -87,9 +219,6 @@ function Vault() {
             <div className="relative z-10 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
                 {/* Header Section */}
                 <div className="relative backdrop-blur-xl bg-gradient-to-b from-white/5 to-white/10 rounded-3xl border border-white/20 shadow-2xl p-8 mb-8">
-                    {/* Glow Effect */}
-                    {/* <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 rounded-3xl blur opacity-30"></div> */}
-                    
                     <div className="relative">
                         <div className="flex flex-col lg:flex-row justify-between items-center gap-6 mb-6">
                             <div className="flex items-center gap-4">
@@ -111,11 +240,8 @@ function Vault() {
                                 <button
                                     className="group relative flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-white transition-all duration-300 overflow-hidden"
                                 >
-                                    {/* Button Background */}
                                     <div className="absolute inset-0 bg-gradient-to-r from-amber-700 to-yellow-700 opacity-100 group-hover:opacity-90 transition-opacity"></div>
-                                    {/* Button Glow */}
                                     <div className="absolute -inset-1 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-xl blur opacity-0 group-hover:opacity-30 transition-opacity"></div>
-                                    {/* Button Content */}
                                     <div className="relative flex items-center">
                                         <Shield className="w-5 h-5 mr-2" />
                                         <span>Secure Vault</span>
@@ -126,11 +252,8 @@ function Vault() {
                                     onClick={handleAdd}
                                     className="group relative flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-white transition-all duration-300 overflow-hidden"
                                 >
-                                    {/* Button Background */}
                                     <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-green-600 opacity-100 group-hover:opacity-90 transition-opacity"></div>
-                                    {/* Button Glow */}
                                     <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-green-500 rounded-xl blur opacity-0 group-hover:opacity-30 transition-opacity"></div>
-                                    {/* Button Content */}
                                     <div className="relative flex items-center">
                                         <Plus className="w-5 h-5 mr-2" />
                                         <span>Add Password</span>
@@ -168,10 +291,8 @@ function Vault() {
                                 disabled={isLoading}
                                 className="group relative flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {/* Button Background */}
                                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-600 opacity-100 group-hover:opacity-90 transition-opacity"></div>
                                 
-                                {/* Button Content */}
                                 <div className="relative flex items-center">
                                     {isLoading ? (
                                         <>
@@ -198,7 +319,6 @@ function Vault() {
                                 key={password.id}
                                 className="group relative backdrop-blur-xl bg-gradient-to-b from-white/5 to-white/10 rounded-2xl border border-white/20 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 overflow-hidden"
                             >
-                                {/* Card Glow Effect */}
                                 <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500/5 to-yellow-500/5 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                                 
                                 <div className="relative p-6">
@@ -239,25 +359,6 @@ function Vault() {
                                                 <Key className="w-4 h-4 text-gray-400" />
                                                 <span className="text-xs text-gray-400">Password</span>
                                             </div>
-                                            <button
-                                                onClick={() => setShowPassword(prev => ({
-                                                    ...prev,
-                                                    [password.id]: !prev[password.id]
-                                                }))}
-                                                className="text-xs text-amber-400 hover:text-amber-300 transition-colors"
-                                            >
-                                                {showPassword[password.id] ? (
-                                                    <>
-                                                        <EyeOff className="inline w-3 h-3 mr-1" />
-                                                        Hide
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Eye className="inline w-3 h-3 mr-1" />
-                                                        Show
-                                                    </>
-                                                )}
-                                            </button>
                                         </div>
                                         <div className="relative">
                                             <input
@@ -295,6 +396,24 @@ function Vault() {
                                         </div>
                                     )}
 
+                                    {/* Action Buttons */}
+                                    <div className="mt-4 pt-4 border-t border-white/10 flex gap-2">
+                                        <button
+                                            onClick={() => handleUpdateClick(password)}
+                                            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-medium hover:opacity-90 transition-all"
+                                        >
+                                            <Edit className="w-4 h-4" />
+                                            Update
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(password.id)}
+                                            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 text-white text-sm font-medium hover:opacity-90 transition-all"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                            Delete
+                                        </button>
+                                    </div>
+
                                     {/* Security Badge */}
                                     <div className="mt-4 pt-4 border-t border-white/10">
                                         <div className="flex items-center justify-between">
@@ -313,7 +432,6 @@ function Vault() {
                     </div>
                 ) : (
                     <div className="relative backdrop-blur-xl bg-gradient-to-b from-white/5 to-white/10 rounded-3xl border border-white/20 shadow-2xl p-12 text-center">
-                        {/* Glow Effect */}
                         <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 rounded-3xl blur opacity-30"></div>
                         
                         <div className="relative">
@@ -335,11 +453,8 @@ function Vault() {
                                 onClick={handleAdd}
                                 className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-xl font-medium text-white transition-all duration-300 overflow-hidden"
                             >
-                                {/* Button Background */}
                                 <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-green-600 opacity-100 group-hover:opacity-90 transition-opacity"></div>
-                                {/* Button Glow */}
                                 <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-green-500 rounded-xl blur opacity-0 group-hover:opacity-30 transition-opacity"></div>
-                                {/* Button Content */}
                                 <div className="relative flex items-center">
                                     <Plus className="w-5 h-5 mr-2" />
                                     <span>Add Your First Password</span>
@@ -364,6 +479,116 @@ function Vault() {
                     </div>
                 </div>
             </div>
+
+            {/* Update Modal */}
+            {isModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                    <div className="relative w-full max-w-md backdrop-blur-xl bg-gradient-to-b from-white/10 to-white/5 rounded-2xl border border-white/20 shadow-2xl">
+                        <div className="p-6">
+                            {/* Modal Header */}
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-2xl font-bold bg-gradient-to-r from-amber-300 to-yellow-300 bg-clip-text text-transparent">
+                                    Update Password
+                                </h2>
+                                <button
+                                    onClick={handleCloseModal}
+                                    className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                                >
+                                    <X className="w-5 h-5 text-gray-400" />
+                                </button>
+                            </div>
+
+                            {/* Update Form */}
+                            <form onSubmit={handleUpdateSubmit} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Website
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="website"
+                                        value={updateFormData.website}
+                                        onChange={handleFormChange}
+                                        className="w-full px-4 py-3 rounded-xl backdrop-blur-sm bg-white/5 border border-white/10 text-gray-200 focus:outline-none focus:border-amber-500/50"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Username
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="username"
+                                        value={updateFormData.username}
+                                        onChange={handleFormChange}
+                                        className="w-full px-4 py-3 rounded-xl backdrop-blur-sm bg-white/5 border border-white/10 text-gray-200 focus:outline-none focus:border-amber-500/50"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        New Password (leave empty to keep current)
+                                    </label>
+                                    <input
+                                        type="password"
+                                        name="password"
+                                        value={updateFormData.password}
+                                        onChange={handleFormChange}
+                                        className="w-full px-4 py-3 rounded-xl backdrop-blur-sm bg-white/5 border border-white/10 text-gray-200 focus:outline-none focus:border-amber-500/50"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Notes
+                                    </label>
+                                    <textarea
+                                        name="note"
+                                        value={updateFormData.note}
+                                        onChange={handleFormChange}
+                                        rows="3"
+                                        className="w-full px-4 py-3 rounded-xl backdrop-blur-sm bg-white/5 border border-white/10 text-gray-200 focus:outline-none focus:border-amber-500/50 resize-none"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Decryption Keyword *
+                                    </label>
+                                    <input
+                                        type="password"
+                                        name="keyword"
+                                        value={updateFormData.keyword}
+                                        onChange={handleFormChange}
+                                        className="w-full px-4 py-3 rounded-xl backdrop-blur-sm bg-white/5 border border-white/10 text-gray-200 focus:outline-none focus:border-amber-500/50"
+                                        required
+                                    />
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="flex gap-3 pt-4">
+                                    <button
+                                        type="button"
+                                        onClick={handleCloseModal}
+                                        className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-gray-700 to-gray-800 text-white font-medium hover:opacity-90 transition-all"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-medium hover:opacity-90 transition-all"
+                                    >
+                                        Update
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
