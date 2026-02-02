@@ -1,15 +1,14 @@
-// filepath: f:\projects\GS\gsecure\gsecure\components\ui\common\Navbar.js
-"use client"
+"use client";
 import { useAuth } from '@/lib/contexts/AuthContext';
 import Link from 'next/link';
 import React from 'react';
 
 function Navbar() {
-  const { user, logout, showTimer, sessionTimeFormatted } = useAuth();
+  const { user, logout, loading } = useAuth();
 
   const handleLogout = () => {
     logout();
-  }
+  };
 
   return (
     <>
@@ -27,18 +26,6 @@ function Navbar() {
                   G-secure
                 </span>
               </Link>
-            </div>
-
-            {/* Center Section - Timer */}
-            <div className="flex-1 flex justify-center">
-              {showTimer && (
-                <div className="flex items-center space-x-2 px-4 py-2 rounded-full bg-gradient-to-r from-red-900/30 to-amber-900/30 backdrop-blur-sm border border-red-500/20">
-                  <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
-                  <span className="text-sm font-semibold tracking-wider text-red-300">
-                    Session: {sessionTimeFormatted}
-                  </span>
-                </div>
-              )}
             </div>
 
             {/* Right Section - GitHub & Auth */}
@@ -64,7 +51,11 @@ function Navbar() {
 
               {/* Auth Buttons */}
               <div className="flex items-center space-x-3 ml-2">
-                {user ? (
+                {loading ? (
+                  <div className="text-white text-sm animate-pulse">
+                    Loading...
+                  </div>
+                ) : user ? (
                   <>
                     <Link
                       href="/vault"
@@ -93,7 +84,7 @@ function Navbar() {
         </div>
       </nav>
     </>
-  )
+  );
 }
 
 export default Navbar;
