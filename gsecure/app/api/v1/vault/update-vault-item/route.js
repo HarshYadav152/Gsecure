@@ -11,7 +11,7 @@ export async function PATCH(req) {
         const { website, username, password, note, keyword } = body;
 
         // Get the token from cookies
-        const token = cookies().get("authToken")?.value;
+        const token = (await cookies()).get("authToken")?.value;
 
         if (!token) {
             return NextResponse.json(
@@ -56,7 +56,7 @@ export async function PATCH(req) {
         await vaultEntry.save();
 
         return NextResponse.json(
-            { success: true, message: "Password entry updated successfully." },
+            { success: true, message: "Vault entry updated successfully." },
             { status: 200 }
         );
     } catch (error) {

@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import CryptoJS from 'crypto-js';
 import connectingtoDB from '@/lib/db/mongodb';
 import User from '@/lib/models/User';
 
@@ -9,9 +8,6 @@ export async function POST(req) {
 
     const body = await req.json();
     const { uname, uemail, upassword, keyword } = body;
-    console.log(body)
-
-    console.log("username",uname)
     // Validate fields
     if ([uemail, upassword, uname, keyword].some((field) => field?.trim() === "")) {
       return NextResponse.json(

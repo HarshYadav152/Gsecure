@@ -52,7 +52,12 @@ export async function POST(req) {
 
     // Create response with cookie
     const response = NextResponse.json(
-      { success: true, data: {}, message: "User logged in successfully" },
+      { success: true, data: {
+        user:{
+          username:user.username,
+          email:user.email
+        }
+      }, message: "User logged in successfully" },
       { status: 200 }
     );
 

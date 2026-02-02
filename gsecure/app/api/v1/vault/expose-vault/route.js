@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 export async function GET(req) {
     try {
         // Get the token from cookies
-        const token = cookies().get("authToken")?.value;
+        const token = (await cookies()).get("authToken")?.value;
 
         if (!token) {
             return NextResponse.json(

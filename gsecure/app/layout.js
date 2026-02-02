@@ -32,7 +32,7 @@ export default function RootLayout({ children }) {
           <main className="relative z-0 min-h-[calc(100vh-120px)]">
             {children}
           </main>
-          <Footer/>
+          <Footer />
         </AuthProvider>
       </body>
     </html>
