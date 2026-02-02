@@ -7,7 +7,7 @@ import { NextResponse } from 'next/server';
 export async function GET(req) {
   try {
     await connectingtoDB();
-    const token = await cookies.get("authToken")?.value;
+    const token = (await cookies()).get("authToken")?.value;
     if (!token) {
       return NextResponse.json(
         { success: false, message: "Unauthorized - No token provided" },
@@ -17,8 +17,8 @@ export async function GET(req) {
 
     // Verify token and get user
     const decoded = await verifyAccessToken(token);
-    
-    const user = await User.findById(decoded.userId).select('-password');
+
+    const user = await User.findById(decoded._id).select('-password');
 
     if (!user) {
       return NextResponse.json(
@@ -28,7 +28,14 @@ export async function GET(req) {
     }
 
     return NextResponse.json(
-      { success: true, data: user, message: "User fetched successfully." },
+      {
+        success: true, data: {
+          user: {
+            username: user.username,
+            email: user.email
+          }
+        }, message: "User fetched successfully."
+      },
       { status: 200 }
     );
 
