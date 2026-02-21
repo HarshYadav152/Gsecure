@@ -18,14 +18,19 @@ export async function POST(req) {
 
     // Check if user exists
     const existedUser = await User.findOne({
-      $or: [{ username:uname }, { email:uemail }]
+      $or: [{ username: uname }, { email: uemail }]
     });
+
+    if (existedUser) {
+      return NextResponse.json({ success: false, message: "User already exists." },
+        { status: 400 })
+    }
 
     // Create user
     const user = await User.create({
       username: uname.toLowerCase(),
-      email:uemail,
-      password:upassword,
+      email: uemail,
+      password: upassword,
       keyword
     });
 

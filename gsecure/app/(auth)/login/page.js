@@ -4,9 +4,10 @@ import Cookies from 'js-cookie';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react'
+import toast from 'react-hot-toast';
 
 function Login(props) {
-    const {setUser,setAuthenticated} = useAuth()
+    const { setUser, setAuthenticated } = useAuth()
     const [errors, setErrors] = useState("")
     const [isLoading, setIsLoading] = useState(false);
     const [logininfo, setLoginInfo] = useState({
@@ -53,17 +54,18 @@ function Login(props) {
                 credentials: "include"
             });
 
-            if (!response.ok) {
-                throw new Error("Authentication failed");
-            }
-
             const result = await response.json();
 
+            if (!response.ok) {
+                toast.error(result?.message)
+                return;
+            }
+
             if (result.success) {
-                Cookies.set("authToken",result.data.authToken)
+                Cookies.set("authToken", result.data.authToken)
                 setAuthenticated(true);
                 setUser(result.data.user);
-                
+
                 router.push("/vault");
             } else {
                 const errorMsg = result.message || "Invalid username or password";
@@ -85,16 +87,16 @@ function Login(props) {
         <>
             {/* Background with blur effect */}
             <div className="min-h-screen flex items-center justify-center relative overflow-hidden ">
-                
+
                 {/* Animated background elements */}
                 <div className="absolute inset-0">
                     {/* Grid pattern */}
                     <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
-                    
+
                     {/* Gradient orbs */}
                     <div className="absolute top-1/4 -left-20 w-72 h-72 bg-gradient-to-r from-amber-500/10 to-orange-600/10 rounded-full blur-3xl"></div>
                     <div className="absolute bottom-1/4 -right-20 w-72 h-72 bg-gradient-to-l from-blue-500/10 to-cyan-600/10 rounded-full blur-3xl"></div>
-                    
+
                     {/* Security pattern overlay */}
                     <div className="absolute inset-0 bg-[url('/api/placeholder/800/800')] opacity-[0.02]"></div>
                 </div>
@@ -103,10 +105,10 @@ function Login(props) {
                 <div className="relative z-10 w-full max-w-md px-2 py-2">
                     {/* Glass container */}
                     <div className="relative rounded-3xl p-8 backdrop-blur-xl bg-gradient-to-br from-white/5 to-white/10 border border-white/20 shadow-2xl">
-                        
+
                         {/* Glow effect */}
                         <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500/30 via-transparent to-blue-500/30 rounded-3xl blur opacity-30"></div>
-                        
+
                         {/* Inner content */}
                         <div className="relative">
                             {/* Header */}
@@ -233,8 +235,8 @@ function Login(props) {
                                 <div className="text-center pt-4 border-t border-white/10">
                                     <p className="text-gray-400 text-sm">
                                         Don't have an account?{' '}
-                                        <Link 
-                                            href="/register" 
+                                        <Link
+                                            href="/register"
                                             className="font-medium bg-gradient-to-r from-amber-300 to-orange-400 bg-clip-text text-transparent hover:from-amber-400 hover:to-orange-500 transition-all"
                                         >
                                             Create secure account
