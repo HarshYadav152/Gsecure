@@ -12,7 +12,7 @@ const AddPassword = () => {
     username: '',
     website: '',
     password: '',
-    notes: '',
+    note: '',
     keyword: '',
   });
 
@@ -25,12 +25,12 @@ const AddPassword = () => {
   };
 
   const handleEncrypt = () => {
-    const { username, password, notes, keyword, website } = formData;
-    
+    const { username, password, note, keyword, website } = formData;
+
     if (!keyword) {
       throw new Error("Master key is required for encryption");
     }
-    
+
     const encryptedUsername = CryptoJS.AES.encrypt(username, keyword).toString();
     const encryptedPassword = CryptoJS.AES.encrypt(password, keyword).toString();
 
@@ -39,7 +39,7 @@ const AddPassword = () => {
       password: encryptedPassword,
       keyword: keyword,
       website: website,
-      notes: notes
+      note: note
     };
   };
 
@@ -47,15 +47,15 @@ const AddPassword = () => {
     e.preventDefault();
     setIsLoading(true);
     setStatus("");
-    
+
     try {
       if (!formData.keyword) {
         setStatus("⚠️ Master key is required for encryption");
         return;
       }
-      
+
       const encryptedData = handleEncrypt();
-      
+
       const url = `${process.env.NEXT_PUBLIC_API_HOST}/api/v1/vault/add-item`;
       const response = await fetch(url, {
         method: "POST",
@@ -81,7 +81,7 @@ const AddPassword = () => {
           username: '',
           website: '',
           password: '',
-          notes: '',
+          note: '',
           keyword: '',
         });
       }
@@ -100,10 +100,10 @@ const AddPassword = () => {
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-16">
         {/* Glass Container */}
         <div className="relative backdrop-blur-xl bg-gradient-to-b from-white/5 to-white/10 rounded-3xl border border-white/20 shadow-2xl overflow-hidden">
-          
+
           {/* Glow Effect */}
           <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/10 to-emerald-500/10 rounded-3xl blur opacity-30"></div>
-          
+
           <div className="relative p-8 lg:p-12">
             {/* Header */}
             <div className="text-center mb-12">
@@ -204,8 +204,8 @@ const AddPassword = () => {
                     </label>
                     <input
                       type="text"
-                      name="notes"
-                      value={formData.notes}
+                      name="note"
+                      value={formData.note}
                       onChange={handleChange}
                       placeholder="Add any hints or details"
                       className="w-full backdrop-blur-sm bg-white/5 border border-white/10 rounded-xl px-5 py-3.5 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:outline-none transition-all duration-300"
@@ -243,11 +243,10 @@ const AddPassword = () => {
 
                   {/* Status Message */}
                   {status && (
-                    <div className={`p-4 rounded-xl backdrop-blur-sm ${
-                      status.includes('✅') ? 'bg-gradient-to-r from-emerald-900/30 to-green-900/20 border-l-4 border-emerald-500' :
+                    <div className={`p-4 rounded-xl backdrop-blur-sm ${status.includes('✅') ? 'bg-gradient-to-r from-emerald-900/30 to-green-900/20 border-l-4 border-emerald-500' :
                       status.includes('⚠️') ? 'bg-gradient-to-r from-amber-900/30 to-yellow-900/20 border-l-4 border-amber-500' :
-                      'bg-gradient-to-r from-rose-900/30 to-red-900/20 border-l-4 border-rose-500'
-                    }`}>
+                        'bg-gradient-to-r from-rose-900/30 to-red-900/20 border-l-4 border-rose-500'
+                      }`}>
                       <div className="flex items-start">
                         {status.includes('✅') ? (
                           <svg className="w-5 h-5 text-emerald-400 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
@@ -275,10 +274,10 @@ const AddPassword = () => {
                   >
                     {/* Button Background */}
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-600 opacity-100 group-hover:opacity-90 transition-opacity"></div>
-                    
+
                     {/* Button Glow */}
                     <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl blur opacity-0 group-hover:opacity-30 transition-opacity"></div>
-                    
+
                     {/* Button Content */}
                     <div className="relative flex items-center justify-center">
                       {isLoading ? (
