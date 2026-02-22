@@ -2,6 +2,7 @@
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import React, { createContext, useState, useEffect, useContext, useRef } from 'react';
+import { Toaster } from 'react-hot-toast';
 
 const AuthContext = createContext();
 
@@ -11,53 +12,55 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-    // Check if user is logged in on initial load
+  // Check if user is logged in on initial load
   useEffect(() => {
     console.log("user status checkrf : ")
     checkUserStatus();
   }, []);
 
   const checkUserStatus = async () => {
-  try {
-    console.log("check user status running ")
-    if (typeof window === 'undefined') {
-      console.log("checkUserStatus skipped on server");
-      return;
-    }
+    try {
+      console.log("check user status running ")
+      if (typeof window === 'undefined') {
+        console.log("checkUserStatus skipped on server");
+        return;
+      }
 
-    setLoading(true);
+      setLoading(true);
 
-    const apiHost = process.env.NEXT_PUBLIC_API_HOST || '';
-    const response = await fetch(`${apiHost}/api/v1/auth/me`, {
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+      const apiHost = process.env.NEXT_PUBLIC_API_HOST || '';
+      const response = await fetch(`${apiHost}/api/v1/auth/me`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch user');
-    }
+      if (!response.ok) {
+        // throw new Error('Failed to fetch user');
+        console.log(response);
 
-    const data = await response.json();
+      }
 
-    if (data.data) {
-      setUser(data.data.user);
-      setAuthenticated(true);
-    } else {
+      const data = await response.json();
+
+      if (data.data) {
+        setUser(data.data.user);
+        setAuthenticated(true);
+      } else {
+        setUser(null);
+        setAuthenticated(false);
+        Cookies.remove('authToken');
+      }
+    } catch (error) {
+      console.error('Error checking authentication status:', error);
       setUser(null);
       setAuthenticated(false);
       Cookies.remove('authToken');
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error('Error checking authentication status:', error);
-    setUser(null);
-    setAuthenticated(false);
-    Cookies.remove('authToken');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   // logout function
   const logout = async (message) => {
@@ -65,13 +68,13 @@ export const AuthProvider = ({ children }) => {
       if (typeof window === 'undefined') return;
       const apiHost = process.env.NEXT_PUBLIC_API_HOST || '';
 
-        await fetch(`${apiHost}/api/v1/auth/logout`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
+      await fetch(`${apiHost}/api/v1/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
 
       // Clear user state and localStorage
       setUser(null);
@@ -109,6 +112,7 @@ export const AuthProvider = ({ children }) => {
       checkUserStatus // Expose this for manual refresh if needed
     }}>
       {children}
+      <Toaster />
     </AuthContext.Provider>
   );
 };

@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 function Signup() {
     const [errors, setErrors] = useState("")
@@ -45,15 +46,16 @@ function Signup() {
                     upassword: signupinfo.upassword,
                     keyword: keyword
                 }),
-                credentials:"include"
+                credentials: "include"
             });
 
             const result = await response.json();
 
-            if (result.ok || result.success) {
+            if (response.ok || result.success) {
                 router.push("/vault");
             } else {
                 const errorMsg = result.message || "Registration failed";
+                toast.error(errorMsg)
                 setErrors(errorMsg);
             }
         } catch (error) {
@@ -74,16 +76,16 @@ function Signup() {
         <>
             {/* Background with blur effect */}
             <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
-                
+
                 {/* Animated background elements */}
                 <div className="absolute inset-0">
                     {/* Grid pattern */}
                     <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
-                    
+
                     {/* Gradient orbs */}
                     <div className="absolute top-1/3 -left-40 w-96 h-96 bg-gradient-to-r from-green-500/5 to-emerald-600/5 rounded-full blur-3xl"></div>
                     <div className="absolute bottom-1/3 -right-40 w-96 h-96 bg-gradient-to-l from-amber-500/5 to-orange-600/5 rounded-full blur-3xl"></div>
-                    
+
                     {/* Security pattern overlay */}
                     <div className="absolute inset-0 opacity-[0.02]">
                         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.1)_1px,transparent_0)] bg-[size:40px_40px]"></div>
@@ -94,10 +96,10 @@ function Signup() {
                 <div className="relative z-10 w-full max-w-2xl px-2 py-2">
                     {/* Glass container */}
                     <div className="relative rounded-3xl p-4 backdrop-blur-xl bg-gradient-to-br from-white/5 to-white/10 border border-white/20 shadow-2xl">
-                        
+
                         {/* Glow effect */}
                         <div className="absolute -inset-0.5 bg-gradient-to-r from-green-500/20 via-transparent to-amber-500/20 rounded-3xl blur opacity-30"></div>
-                        
+
                         {/* Inner content */}
                         <div className="relative">
                             {/* Header */}
@@ -327,8 +329,8 @@ function Signup() {
                                 <div className="text-center pt-6 border-t border-white/10">
                                     <p className="text-gray-400">
                                         Already have an account?{' '}
-                                        <Link 
-                                            href="/login" 
+                                        <Link
+                                            href="/login"
                                             className="font-medium bg-gradient-to-r from-amber-300 to-orange-400 bg-clip-text text-transparent hover:from-amber-400 hover:to-orange-500 transition-all"
                                         >
                                             Sign in to your vault
