@@ -34,10 +34,20 @@ export async function POST(req) {
       keyword
     });
 
-    return NextResponse.json(
+    const accessToken = user.generateAccessToken();
+    const response = NextResponse.json(
       { success: true, data: {}, message: "User created successfully." },
       { status: 201 }
     );
+    
+    response.cookies.set('authToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7
+    });
+
+    return response;
 
   } catch (error) {
     console.error('Signup error:', error);

@@ -21,14 +21,14 @@ export async function GET(req) {
         // Fetch vault entries for the user
         const vaultEntries = await Vault.find({ owner: decoded._id })
             .sort({ updatedAt: -1 })
-            .select("website username upassword notes createdAt updatedAt");
+            .select("website username upassword note createdAt updatedAt");
 
         const validEntries = vaultEntries.map((entry) => ({
             id: entry._id,
             website: entry.website,
             username: entry.username,
             password: entry.upassword,
-            notes: entry.notes,
+            notes: entry.note,
             lastUpdated: entry.updatedAt,
             created: entry.createdAt,
         }));

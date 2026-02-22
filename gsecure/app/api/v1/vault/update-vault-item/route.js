@@ -51,7 +51,7 @@ export async function PATCH(req) {
         vaultEntry.website = website || vaultEntry.website;
         vaultEntry.username = username || vaultEntry.username;
         vaultEntry.upassword = password || vaultEntry.upassword;
-        vaultEntry.notes = note || vaultEntry.notes;
+        vaultEntry.note = note || vaultEntry.note;
 
         await vaultEntry.save();
 
