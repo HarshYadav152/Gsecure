@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+import { Eye, EyeOff } from 'lucide-react';
 
 function Signup() {
     const [errors, setErrors] = useState("")
@@ -13,6 +14,7 @@ function Signup() {
         upassword: '',
         keyword: ''
     })
+    const [showPassword, setShowPassword] = useState(false)
 
     const router = useRouter();
 
@@ -205,14 +207,25 @@ function Signup() {
                                             <input
                                                 id="upassword"
                                                 name="upassword"
-                                                type="password"
+                                                type={showPassword ? "text" : "password"}
                                                 value={signupinfo.upassword}
                                                 onChange={handlechange}
                                                 disabled={isLoading}
-                                                className="block w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all duration-300 disabled:opacity-50"
+                                                className="block w-full pl-10 pr-12 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all duration-300 disabled:opacity-50"
                                                 placeholder="••••••••"
                                                 required
                                             />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-200 transition-colors focus:outline-none"
+                                            >
+                                                {showPassword ? (
+                                                    <EyeOff className="h-5 w-5" />
+                                                ) : (
+                                                    <Eye className="h-5 w-5" />
+                                                )}
+                                            </button>
                                         </div>
                                         <p className="text-xs text-gray-500 mt-1">
                                             Minimum 8 characters with letters and numbers

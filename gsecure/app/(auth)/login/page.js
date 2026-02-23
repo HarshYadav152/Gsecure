@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react'
 import toast from 'react-hot-toast';
+import { Eye, EyeOff } from 'lucide-react';
 
 function Login(props) {
     const { setUser, setAuthenticated } = useAuth()
@@ -15,6 +16,7 @@ function Login(props) {
         password: '',
         keyword: ''
     });
+    const [showPassword, setShowPassword] = useState(false);
 
     const router = useRouter();
 
@@ -181,14 +183,25 @@ function Login(props) {
                                         <input
                                             id="password"
                                             name="password"
-                                            type="password"
+                                            type={showPassword ? "text" : "password"}
                                             onChange={handlechange}
                                             value={logininfo.password}
                                             disabled={isLoading}
-                                            className="block w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="block w-full pl-10 pr-12 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                                             placeholder="Enter your password"
                                             required
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-200 transition-colors focus:outline-none"
+                                        >
+                                            {showPassword ? (
+                                                <EyeOff className="h-5 w-5" />
+                                            ) : (
+                                                <Eye className="h-5 w-5" />
+                                            )}
+                                        </button>
                                     </div>
                                 </div>
 
