@@ -204,6 +204,14 @@ function Login(props) {
                                         </button>
                                     </div>
                                 </div>
+                                <div className="flex justify-end mt-2">
+                                    <Link
+                                        href="/forgot-password"
+                                        className="text-xs sm:text-sm font-medium text-amber-500 hover:text-amber-400 transition-colors"
+                                    >
+                                        Forgot your password?
+                                    </Link>
+                                </div>
 
                                 {/* Security note */}
                                 <div className="p-3 rounded-lg bg-gradient-to-r from-gray-900/50 to-gray-800/50 border border-gray-700/50">

@@ -3,51 +3,55 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 const UserSchema = new mongoose.Schema({
-    username:{
-        type:String,
-        required:true,
-        unique:true,
-        lowercase:true,
-        trim:true,
-        index:true
+    username: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,
+        trim: true,
+        index: true
     },
-    email:{
-        type:String,
-        required:true,
-        unique:true,
-        lowercase:true,
-        trim:true
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,
+        trim: true
     },
-    password:{
-        type:String,
-        required:[true,"Password can't be blank"]
+    password: {
+        type: String,
+        required: [true, "Password can't be blank"]
     },
-    keyword:{ // as G-tag
-        type:String,
-        required:true,
+    keyword: { // as G-tag
+        type: String,
+        required: true,
+    },
+    passwordChangedAt: {
+        type: Date
     }
-},{timestamps:true});
+}, { timestamps: true });
 
-UserSchema.pre("save",async function(){
-    if(!this.isModified("password")) return;
-    this.password = await bcrypt.hash(this.password,5)
+UserSchema.pre("save", async function () {
+    if (!this.isModified("password")) return;
+    this.password = await bcrypt.hash(this.password, 5)
+    this.passwordChangedAt = new Date();
 })
 
-UserSchema.methods.isPasswordCorrect = async function(password){
-    return await bcrypt.compare(password,this.password);
+UserSchema.methods.isPasswordCorrect = async function (password) {
+    return await bcrypt.compare(password, this.password);
 }
 
-UserSchema.methods.generateAccessToken = function(){
+UserSchema.methods.generateAccessToken = function () {
     return jwt.sign(
         {
-            _id:this._id,
-            email:this.email,
-            username:this.username,
-            time:this.createdAt
+            _id: this._id,
+            email: this.email,
+            username: this.username,
+            time: this.createdAt
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
-            expiresIn:process.env.ACCESS_TOKEN_EXPIRY
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRY
         }
     )
 }
