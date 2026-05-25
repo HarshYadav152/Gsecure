@@ -52,10 +52,10 @@ function Footer() {
           <div className="space-y-4">
             <h3 className="text-white font-semibold tracking-wide">Security</h3>
             <ul className="space-y-3">
-              {['Audit Report', 'Encryption', 'Compliance', 'Privacy'].map((item) => (
+              {['Audit Report', 'Encryption', 'Compliance', 'Privacy Policy'].map((item) => (
                 <li key={item}>
                   <Link 
-                    href="#" 
+                    href={item === 'Privacy Policy' ? '/privacy' : '#'}
                     className="text-gray-400 hover:text-amber-300 transition-colors duration-300 text-sm group flex items-center"
                   >
                     <span className="w-0 group-hover:w-2 h-px bg-amber-400 mr-0 group-hover:mr-2 transition-all duration-300"></span>
@@ -98,13 +98,13 @@ function Footer() {
             </div>
             
             <div className="flex items-center space-x-6 text-sm">
-              <Link href="#" className="text-gray-400 hover:text-amber-300 transition-colors">
+              <Link href="/terms" className="text-gray-400 hover:text-amber-300 transition-colors">
                 Terms
               </Link>
-              <Link href="#" className="text-gray-400 hover:text-amber-300 transition-colors">
+              <Link href="/privacy" className="text-gray-400 hover:text-amber-300 transition-colors">
                 Privacy
               </Link>
-              <Link href="#" className="text-gray-400 hover:text-amber-300 transition-colors">
+              <Link href="/cookies" className="text-gray-400 hover:text-amber-300 transition-colors">
                 Cookies
               </Link>
               <div className="flex items-center space-x-2">
