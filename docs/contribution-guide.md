@@ -46,7 +46,7 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 - Use **Tailwind CSS** for all styling — no inline styles
 - Follow the existing component structure inside `gsecure/`
-- All new API routes go under `gsecure/pages/api/` or `gsecure/app/api/`
+- All new API routes go under `gsecure/app/api/`
 - Run `npm run lint` before submitting a PR
 
 ## Reporting Bugs
