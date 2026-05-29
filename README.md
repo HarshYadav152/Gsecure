@@ -77,8 +77,6 @@
 
 ## 🧑‍💻 Contributing
 
-## 🧑‍💻 Contributing
-
 We welcome contributions! Check out the full documentation in the [`docs/`](./docs/) folder:
 
 - [Installation Guide](./docs/installation.md)

@@ -12,7 +12,7 @@ Gsecure/
 ├── CONTRIBUTING.md       # Quick contribution guide
 ├── CODE_OF_CONDUCT.md    # Community standards
 ├── SECURITY.md           # Security policy & vulnerability reporting
-└── LICENCE               # MIT License
+└── LICENSE               # MIT License
 
 ## Inside `gsecure/` (the Next.js App)
 

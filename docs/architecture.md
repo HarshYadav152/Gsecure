@@ -18,16 +18,15 @@ G-Secure is a full-stack web application built with Next.js. Here is an overview
 
 1. User registers or logs in (email/password, Google, or GitHub).
 2. Password is hashed with **bcrypt** before storage.
-3. On successful login, a **JWT token** is issued and stored client-side.
-4. All subsequent API requests carry the JWT for verification.
+3. On successful login, a **JWT token** is issued in the `authToken` cookie.
+4. Protected routes verify the JWT from cookies on subsequent requests.
 
 ## Encryption Flow
 
 - Passwords stored in the vault are encrypted using **AES-256**.
-- Only the authenticated user's key is used for encryption/decryption.
-- The server never has access to plaintext passwords — **Zero Knowledge Architecture**.
-
-## Zero Knowledge Protocol
+- Vault fields are encrypted client-side before submission.
+- Decryption requires the user-provided keyword during vault operations.
+- Current design reduces plaintext exposure in transit/storage, but is not strict zero-knowledge.
 
 ## Key Features Architecture
 
