@@ -77,9 +77,18 @@
 
 ## 🧑‍💻 Contributing
 
-We welcome contributions! If you'd like to contribute to G-Secure, please fork the repository and submit a pull request.
+## 🧑‍💻 Contributing
 
----
+We welcome contributions! Check out the full documentation in the [`docs/`](./docs/) folder:
+
+- [Installation Guide](./docs/installation.md)
+- [Architecture Overview](./docs/architecture.md)
+- [Contribution Guide](./docs/contribution-guide.md)
+- [Deployment Guide](./docs/deployment.md)
+- [API Documentation](./docs/api.md)
+- [Folder Structure](./docs/folder-structure.md)
+
+Please fork the repository and submit a pull request. See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 
 ## 📜 License
 
