@@ -34,14 +34,19 @@ function Footer() {
           <div className="space-y-4">
             <h3 className="text-white font-semibold tracking-wide">Product</h3>
             <ul className="space-y-3">
-              {['Vault', 'Generator', 'Analytics', 'API'].map((item) => (
-                <li key={item}>
+              {[
+                { label: 'Vault', href: '/vault' },
+                { label: 'Generator', href: '/features/generate-password' },
+                { label: 'Analytics', href: '/features' },
+                { label: 'API', href: '/features' }
+              ].map((item) => (
+                <li key={item.label}>
                   <Link 
-                    href="#" 
+                    href={item.href} 
                     className="text-gray-400 hover:text-amber-300 transition-colors duration-300 text-sm group flex items-center"
                   >
                     <span className="w-0 group-hover:w-2 h-px bg-amber-400 mr-0 group-hover:mr-2 transition-all duration-300"></span>
-                    {item}
+                    {item.label}
                   </Link>
                 </li>
               ))}
@@ -52,14 +57,19 @@ function Footer() {
           <div className="space-y-4">
             <h3 className="text-white font-semibold tracking-wide">Security</h3>
             <ul className="space-y-3">
-              {['Audit Report', 'Encryption', 'Compliance', 'Privacy'].map((item) => (
-                <li key={item}>
+              {[
+                { label: 'Audit Report', href: '/privacy' },
+                { label: 'Encryption', href: '/privacy' },
+                { label: 'Compliance', href: '/terms' },
+                { label: 'Privacy', href: '/privacy' }
+              ].map((item) => (
+                <li key={item.label}>
                   <Link 
-                    href="#" 
+                    href={item.href} 
                     className="text-gray-400 hover:text-amber-300 transition-colors duration-300 text-sm group flex items-center"
                   >
                     <span className="w-0 group-hover:w-2 h-px bg-amber-400 mr-0 group-hover:mr-2 transition-all duration-300"></span>
-                    {item}
+                    {item.label}
                   </Link>
                 </li>
               ))}
