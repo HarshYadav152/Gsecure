@@ -41,6 +41,41 @@
 
 ---
 
+## 🧑‍💻 Local Development
+
+To work on the application locally:
+
+1. Clone the repository and change into the app folder:
+   ```bash
+   git clone https://github.com/KGFCH2/Gsecure.git
+   cd Gsecure/gsecure
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Copy the example environment file and configure your local values:
+   ```bash
+   cp .env.local.example .env.local
+   ```
+4. Update `.env.local` with the actual values for:
+   - `MONGODB_URI`
+   - `NEXT_PUBLIC_API_HOST`
+   - `ACCESS_TOKEN_SECRET`
+   - `ACCESS_TOKEN_EXPIRY`
+   - SMTP and email settings if you need password reset email support
+
+5. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+6. Open `http://localhost:3000` in your browser.
+
+> Note: the frontend and API are served together from the `gsecure/` folder using Next.js.
+
+---
+
 ## 🛠️ Tools and Utilities
 
 - **Password Generator**  
