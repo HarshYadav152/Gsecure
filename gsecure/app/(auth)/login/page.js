@@ -1,6 +1,5 @@
 "use client"
 import { useAuth } from '@/lib/contexts/AuthContext';
-import Cookies from 'js-cookie';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react'
@@ -64,7 +63,6 @@ function Login(props) {
             }
 
             if (result.success) {
-                Cookies.set("authToken", result.data.authToken)
                 setAuthenticated(true);
                 setUser(result.data.user);
 
