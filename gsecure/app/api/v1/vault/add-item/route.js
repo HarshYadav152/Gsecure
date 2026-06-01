@@ -23,11 +23,9 @@ export async function POST(req) {
 
         // Verify the token
         const decoded = await verifyAccessToken(token);
-        console.log("decoded at route : ",decoded._id)
 
         // Find the user by ID from the token payload
         const owner = await User.findById(decoded._id);
-        console.log("ownere is : ",owner);
         if (!owner) {
             return NextResponse.json(
                 { success: false, message: "User not found." },
