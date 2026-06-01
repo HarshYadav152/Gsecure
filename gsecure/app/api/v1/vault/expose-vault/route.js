@@ -1,3 +1,4 @@
+import connectingtoDB from '@/lib/db/mongodb';
 import Vault from "@/lib/models/Vault";
 import { verifyAccessToken } from "@/lib/utils/jwt";
 import { cookies } from "next/headers";
@@ -5,6 +6,7 @@ import { NextResponse } from "next/server";
 
 export async function GET(req) {
     try {
+        await connectingtoDB();
         // Get the token from cookies
         const token = (await cookies()).get("authToken")?.value;
 

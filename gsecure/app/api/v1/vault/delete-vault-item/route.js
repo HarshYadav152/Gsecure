@@ -1,3 +1,4 @@
+import connectingtoDB from '@/lib/db/mongodb';
 import Vault from "@/lib/models/Vault";
 import { verifyAccessToken } from "@/lib/utils/jwt";
 import { cookies } from "next/headers";
@@ -5,6 +6,7 @@ import { NextResponse } from "next/server";
 
 export async function DELETE(req) {
     try {
+        await connectingtoDB();
         const { searchParams } = new URL(req.url);
         const id = searchParams.get("id"); // Get the `id` from query params
         const body = await req.json();
