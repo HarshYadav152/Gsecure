@@ -1,7 +1,7 @@
 "use client"
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
-import React, { createContext, useState, useEffect, useContext, useRef } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Toaster } from 'react-hot-toast';
 
 const AuthContext = createContext();
@@ -14,15 +14,12 @@ export const AuthProvider = ({ children }) => {
 
   // Check if user is logged in on initial load
   useEffect(() => {
-    console.log("user status checkrf : ")
     checkUserStatus();
   }, []);
 
   const checkUserStatus = async () => {
     try {
-      console.log("check user status running ")
       if (typeof window === 'undefined') {
-        console.log("checkUserStatus skipped on server");
         return;
       }
 
@@ -36,13 +33,11 @@ export const AuthProvider = ({ children }) => {
         },
       });
 
-      if (!response.ok) {
-        // throw new Error('Failed to fetch user');
-        console.log(response);
-
-      }
-
       const data = await response.json();
+
+      if (!response.ok || !data?.data) {
+        throw new Error(data?.message || 'Failed to fetch user status');
+      }
 
       if (data.data) {
         setUser(data.data.user);
