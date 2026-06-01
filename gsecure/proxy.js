@@ -29,7 +29,6 @@ export async function proxy(request) {
   
   // Get token from cookies
   const token = request.cookies.get('authToken')?.value;
-  console.log("token in middleware : ", token);
 
   // Check if the route is protected
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
