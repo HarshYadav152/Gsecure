@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectingtoDB from '@/lib/db/mongodb';
 import User from '@/lib/models/User';
+import { generateAccessToken } from '@/lib/utils/jwt';
 
 export async function POST(req) {
   try {
@@ -34,10 +35,30 @@ export async function POST(req) {
       keyword
     });
 
-    return NextResponse.json(
-      { success: true, data: {}, message: "User created successfully." },
+    const { authToken } = await generateAccessToken(user._id);
+
+    const response = NextResponse.json(
+      {
+        success: true,
+        data: {
+          user: {
+            username: user.username,
+            email: user.email,
+          }
+        },
+        message: "User created successfully."
+      },
       { status: 201 }
     );
+
+    response.cookies.set('authToken', authToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24 * 7 // 7 days
+    });
+
+    return response;
 
   } catch (error) {
     console.error('Signup error:', error);
