@@ -1,6 +1,6 @@
 # API & Authentication Documentation
 
-G-Secure uses Next.js API Routes for backend logic. Protected routes require a valid JWT carried in the `authToken` cookie
+G-Secure uses Next.js API Routes for backend logic. Protected routes require a valid JWT carried in the `authToken` cookie.
 
 ## Authentication
 
@@ -50,17 +50,20 @@ G-Secure supports OAuth via NextAuth.js. Redirect the user to:
 ## Vault (Password Storage)
 
 All vault routes require authenticated requests. Include cookies in your fetch calls:
+
 credentials: "include"
 ### Add a new entry
 
 **Request body:**
 ```json
 {
+  
   "website": "github.com",
   "username": "<AES-encrypted>",
   "password": "<AES-encrypted>",
   "keyword": "<user-provided-master-key>",
   "notes": "optional notes"
+
 }
 ```
 

@@ -25,7 +25,7 @@ GOOGLE_CLIENT_ID
 GOOGLE_CLIENT_SECRET
 GITHUB_CLIENT_ID
 GITHUB_CLIENT_SECRET
-NEXT_PUBLIC_API_HOST    
+NEXT_PUBLIC_API_HOST   ← set this to your Vercel production URL   
 
 ---
 
@@ -72,3 +72,5 @@ server {
 Use [MongoDB Atlas](https://www.mongodb.com/atlas) for production. Replace `MONGODB_URI` in your environment variables with your Atlas connection string:
 
 MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/<dbname>?retryWrites=true&w=majority
+
+Replace `<username>`, `<password>`, and `<dbname>` with your actual MongoDB Atlas credentials. Paste this into Vercel Dashboard → Environment Variables. Never commit real credentials to the repo.
