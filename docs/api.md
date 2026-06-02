@@ -69,6 +69,33 @@ credentials: "include"
 
 ### Delete an entry
 
+**Example:**
+**Response:**
+```json
+{
+  "message": "Entry deleted successfully"
+}
+```
+
+---
+
+### Expose (View) an entry
+
+Fetches and decrypts a single vault entry by its ID.
+
+**Example:**
+**Response:**
+```json
+{
+  "_id": "64abc123def456",
+  "website": "github.com",
+  "username": "<AES-decrypted>",
+  "password": "<AES-decrypted>",
+  "notes": "optional notes"
+}
+```
+
+> Decryption happens client-side using the user's keyword. The server returns the encrypted blob.
 ---
 
 ## Utilities
