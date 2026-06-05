@@ -7,7 +7,32 @@ const STATE_COOKIE = 'github_oauth_state';
 const GITHUB_TOKEN_URL = 'https://github.com/login/oauth/access_token';
 const GITHUB_USER_URL = 'https://api.github.com/user';
 const GITHUB_EMAILS_URL = 'https://api.github.com/user/emails';
+const GITHUB_FETCH_TIMEOUT_MS = 8000;
 
+/**
+ * fetch() wrapper that aborts after timeoutMs so a stalled GitHub upstream
+ * cannot hang the auth request indefinitely.
+ * @param {string} url
+ * @param {RequestInit} [options]
+ * @param {number} [timeoutMs]
+ * @returns {Promise<Response>}
+ */
+async function fetchWithTimeout(url, options = {}, timeoutMs = GITHUB_FETCH_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Build a redirect back to /login, optionally with an ?error code so the UI
+ * can surface what went wrong without leaking details.
+ * @param {string} [errorCode]
+ * @returns {NextResponse}
+ */
 function loginRedirect(errorCode) {
   const base = process.env.NEXT_PUBLIC_API_HOST || 'http://localhost:3000';
   const url = new URL('/login', base);
@@ -15,10 +40,17 @@ function loginRedirect(errorCode) {
   return NextResponse.redirect(url);
 }
 
-// GET /api/v1/auth/github/callback
-// Validates the CSRF state, exchanges the code for a token, resolves the GitHub
-// profile + verified email, links or creates the user, and issues the same
-// session cookie the password login uses.
+/**
+ * GET /api/v1/auth/github/callback
+ *
+ * OAuth callback: validates the CSRF state, exchanges the code for an access
+ * token, resolves a GitHub-verified email (server-side), then links or creates
+ * the account and issues the same authToken cookie the password login uses.
+ * Only verified emails are ever trusted for linking, and an email already bound
+ * to a different GitHub account is never silently re-linked.
+ * @param {Request} req
+ * @returns {Promise<NextResponse>}
+ */
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
@@ -39,7 +71,7 @@ export async function GET(req) {
     }
 
     // 2. Exchange the authorization code for an access token.
-    const tokenRes = await fetch(GITHUB_TOKEN_URL, {
+    const tokenRes = await fetchWithTimeout(GITHUB_TOKEN_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({
@@ -61,7 +93,7 @@ export async function GET(req) {
       Accept: 'application/vnd.github+json',
       'User-Agent': 'gsecure',
     };
-    const userRes = await fetch(GITHUB_USER_URL, { headers: ghHeaders });
+    const userRes = await fetchWithTimeout(GITHUB_USER_URL, { headers: ghHeaders });
     if (!userRes.ok) {
       return loginRedirect('github_profile_fetch_failed');
     }
@@ -72,17 +104,24 @@ export async function GET(req) {
       return loginRedirect('github_profile_incomplete');
     }
 
-    // 4. Resolve a verified primary email (server-side), with a deterministic
-    //    GitHub no-reply fallback so the required email field is always set.
+    // 4. Resolve a GitHub-VERIFIED email only. We never trust an unverified
+    //    address for account creation/linking (it would be an account-takeover
+    //    vector). If none is verified, use a deterministic no-reply fallback so
+    //    the required, unique email field is always satisfied. A failed/stalled
+    //    emails fetch also falls through to the no-reply fallback.
     let email = null;
-    const emailsRes = await fetch(GITHUB_EMAILS_URL, { headers: ghHeaders });
-    if (emailsRes.ok) {
-      const emails = await emailsRes.json();
-      if (Array.isArray(emails)) {
-        const primaryVerified = emails.find((e) => e.primary && e.verified);
-        const anyVerified = emails.find((e) => e.verified);
-        email = (primaryVerified || anyVerified || emails[0])?.email || null;
+    try {
+      const emailsRes = await fetchWithTimeout(GITHUB_EMAILS_URL, { headers: ghHeaders });
+      if (emailsRes.ok) {
+        const emails = await emailsRes.json();
+        if (Array.isArray(emails)) {
+          const primaryVerified = emails.find((e) => e.primary && e.verified);
+          const anyVerified = emails.find((e) => e.verified);
+          email = (primaryVerified || anyVerified)?.email || null;
+        }
       }
+    } catch {
+      // ignore - fall through to the no-reply fallback below
     }
     if (!email) {
       email = `${githubId}+${login}@users.noreply.github.com`;
@@ -91,15 +130,20 @@ export async function GET(req) {
 
     await connectingtoDB();
 
-    // 5. Account linking (prevents duplicate accounts):
+    // 5. Account resolution (prevents duplicates and unsafe linking):
     //    a) returning GitHub user -> matched by githubId
-    //    b) existing local user, same email -> link githubId onto it
-    //    c) otherwise -> create a new GitHub-authenticated account
+    //    b) existing account with the same VERIFIED email and no githubId (or
+    //       the same githubId) -> link githubId onto it
+    //    c) email already bound to a DIFFERENT githubId -> refuse (no hijack)
+    //    d) otherwise -> create a new GitHub-authenticated account
     let user = await User.findOne({ githubId });
 
     if (!user) {
       const byEmail = await User.findOne({ email });
       if (byEmail) {
+        if (byEmail.githubId && byEmail.githubId !== githubId) {
+          return loginRedirect('github_account_conflict');
+        }
         byEmail.githubId = githubId;
         await byEmail.save();
         user = byEmail;
