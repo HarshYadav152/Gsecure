@@ -20,11 +20,30 @@ const UserSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: [true, "Password can't be blank"]
+        // Only local (username/password) accounts need a password. OAuth
+        // accounts (e.g. GitHub) authenticate with the provider instead.
+        required: [
+            function () { return this.authProvider === "local"; },
+            "Password can't be blank"
+        ]
     },
     keyword: { // as G-tag
         type: String,
-        required: true,
+        // Required for local sign-ups only; OAuth accounts don't set one.
+        required: function () { return this.authProvider === "local"; },
+    },
+    authProvider: {
+        type: String,
+        enum: ["local", "github"],
+        default: "local"
+    },
+    githubId: {
+        // GitHub numeric account id (stored as string). Sparse + unique so
+        // existing local users (no githubId) are excluded from the index and
+        // never collide on null.
+        type: String,
+        unique: true,
+        sparse: true
     },
     passwordChangedAt: {
         type: Date
