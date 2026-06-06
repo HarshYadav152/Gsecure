@@ -173,7 +173,11 @@ export async function GET(req) {
     const { authToken } = await generateAccessToken(user._id);
 
     const base = process.env.NEXT_PUBLIC_API_HOST || 'http://localhost:3000';
-    const response = NextResponse.redirect(new URL('/vault', base));
+    // Redirect to an interstitial page that confirms the auth cookie is
+    // readable (via /api/v1/auth/me) before sending the user on to /vault.
+    // Some browsers don't expose a freshly-Set-Cookie value to the very next
+    // navigation, which previously required a manual refresh of /vault.
+    const response = NextResponse.redirect(new URL('/auth/success', base));
 
     response.cookies.set('authToken', authToken, {
       httpOnly: true,
