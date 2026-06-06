@@ -1,43 +1,42 @@
 "use client"
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 // Post-OAuth interstitial.
 //
-// GitHub OAuth (and the password login) issue the `authToken` cookie on a
-// redirect response. A few browsers don't make that freshly-Set-Cookie value
-// available to the very next navigation, so landing straight on /vault could
-// show a logged-out state until a manual refresh. This page instead confirms
-// the session is live by calling /api/v1/auth/me (which reads the cookie) and
-// only forwards to /vault once that succeeds. Because the cookie can lag by a
-// moment, the check retries a few times before giving up and sending the user
-// back to /login.
+// GitHub OAuth issues the `authToken` cookie on a redirect response. A few
+// browsers don't make that freshly-Set-Cookie value available to the very next
+// navigation, so landing straight on /vault could show a logged-out state
+// until a manual refresh. This page confirms the session is live by calling
+// /api/v1/auth/me (which reads the cookie server-side) and only forwards to
+// /vault once that succeeds. The check retries a few times to absorb the
+// brief cookie-propagation lag; each attempt is individually time-bounded so
+// a hung network request cannot stall the loop indefinitely.
 const MAX_ATTEMPTS = 5;
 const RETRY_DELAY_MS = 400;
+const FETCH_TIMEOUT_MS = 5000;
 
 function AuthSuccess() {
     const { setUser, setAuthenticated } = useAuth();
     const router = useRouter();
     const [status, setStatus] = useState('Confirming your secure session...');
-    // Guards against React StrictMode's double-invoked effect in development
-    // and against state updates / duplicate redirects after unmount.
-    const startedRef = useRef(false);
 
     useEffect(() => {
-        if (startedRef.current) return;
-        startedRef.current = true;
-
         let active = true;
         const apiHost = process.env.NEXT_PUBLIC_API_HOST || '';
 
         const confirmSession = async () => {
             for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
                 try {
                     const response = await fetch(`${apiHost}/api/v1/auth/me`, {
                         credentials: 'include',
                         headers: { 'Content-Type': 'application/json' },
+                        signal: controller.signal,
                     });
 
                     if (response.ok) {
@@ -53,9 +52,11 @@ function AuthSuccess() {
                     }
                 } catch (error) {
                     console.error('Session confirmation attempt failed:', error);
+                } finally {
+                    clearTimeout(timer);
                 }
 
-                // Cookie may not be readable yet, wait and retry.
+                // Cookie may not be readable yet - wait and retry.
                 if (attempt < MAX_ATTEMPTS) {
                     if (!active) return;
                     setStatus('Verifying your login...');
