@@ -42,13 +42,7 @@ G-Secure uses Next.js API Routes for backend logic. Protected routes require a v
 
 ---
 
-### OAuth Login (Google / GitHub)
 
-G-Secure supports OAuth via NextAuth.js. Redirect the user to:
-- Google: `/api/auth/signin/google`
-- GitHub: `/api/auth/signin/github`
-
-After successful authentication, NextAuth.js redirects the user back to the application dashboard.
 
 
 ## Vault (Password Storage)
