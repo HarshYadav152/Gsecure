@@ -152,10 +152,16 @@ export async function GET(req) {
 
     if (!user) {
       // Dedupe the chosen username against the unique index.
+      // A cap prevents a theoretical runaway loop on a severely saturated
+      // namespace; in practice random suffixes make collisions negligible.
+      const MAX_USERNAME_ATTEMPTS = 10;
       let username = login.toLowerCase();
       let attempt = 0;
       while (await User.findOne({ username })) {
         attempt += 1;
+        if (attempt >= MAX_USERNAME_ATTEMPTS) {
+          return loginRedirect('username_generation_failed');
+        }
         username =
           attempt === 1
             ? `${login.toLowerCase()}-${githubId.slice(-4)}`
@@ -184,6 +190,7 @@ export async function GET(req) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/',
     });
     // Clear the one-time CSRF state cookie.
     response.cookies.set(STATE_COOKIE, '', {
